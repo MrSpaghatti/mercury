@@ -90,7 +90,6 @@ from .cronjob_tools import (
     remove_cronjob,
     check_cronjob_requirements,
     get_cronjob_tool_definitions,
-    CRONJOB_SCHEMA,
 )
 
 # RL Training tools (Tinker-Atropos)
@@ -216,7 +215,6 @@ __all__ = [
     'remove_cronjob',
     'check_cronjob_requirements',
     'get_cronjob_tool_definitions',
-    'CRONJOB_SCHEMA',
     # RL Training tools
     'rl_list_environments',
     'rl_select_environment',
