@@ -465,8 +465,57 @@ def execute_code(
         if _tz_name:
             child_env["TZ"] = _tz_name
 
+        cmd = [sys.executable, "script.py"]
+        import shutil
+        bwrap_path = shutil.which("bwrap")
+        if bwrap_path and not _IS_WINDOWS:
+            # Subprocess sandboxing with bwrap/seccomp
+            # Constrain exec tool to tmpdir and block filesystem escapes
+            cmd = [
+                bwrap_path,
+                "--unshare-all",
+                "--share-net",  # allow access to UDS and loopback
+                "--die-with-parent",
+                "--new-session",
+                "--ro-bind", "/usr", "/usr",
+                "--ro-bind", "/bin", "/bin",
+                "--ro-bind", "/lib", "/lib",
+                "--ro-bind", "/lib64", "/lib64",
+                "--ro-bind", "/etc/resolv.conf", "/etc/resolv.conf",
+            ]
+
+            for path in ["/etc/ssl", "/etc/pki", "/etc/ca-certificates", "/etc/alternatives"]:
+                if os.path.exists(path):
+                    cmd.extend(["--ro-bind", path, path])
+
+            cmd.extend([
+                "--tmpfs", "/tmp",
+                "--bind", tmpdir, tmpdir,
+                "--chdir", tmpdir,
+            ])
+            
+            # Bind mount the exact socket file
+            cmd.extend(["--bind", sock_path, sock_path])
+
+            # Also bind mount the root directory to allow imports since PYTHONPATH points there
+            cmd.extend(["--ro-bind", _hermes_root, _hermes_root])
+            
+            # Bind mount sys.base_prefix and sys.prefix to allow python to load
+            for prefix in set([sys.base_prefix, sys.prefix]):
+                if prefix and os.path.exists(prefix) and not prefix.startswith("/usr"):
+                    cmd.extend(["--ro-bind", prefix, prefix])
+            
+            # Also bind mount the real path of sys.executable's directory if needed
+            exe_dir = os.path.dirname(os.path.realpath(sys.executable))
+            if exe_dir and os.path.exists(exe_dir) and not exe_dir.startswith("/usr"):
+                # to avoid duplicate mounts, check if we already cover it
+                if not any(exe_dir.startswith(p) for p in [sys.base_prefix, sys.prefix, _hermes_root]):
+                    cmd.extend(["--ro-bind", exe_dir, exe_dir])
+
+            cmd.extend([sys.executable, "script.py"])
+
         proc = subprocess.Popen(
-            [sys.executable, "script.py"],
+            cmd,
             cwd=tmpdir,
             env=child_env,
             stdout=subprocess.PIPE,
