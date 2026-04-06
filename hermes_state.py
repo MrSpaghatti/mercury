@@ -15,6 +15,23 @@ Key design decisions:
 """
 
 import json
+try:
+    import orjson
+except ImportError:
+    orjson = None
+
+try:
+    import ujson
+except ImportError:
+    ujson = None
+
+def _fast_json_loads(data):
+    if orjson:
+        return orjson.loads(data)
+    if ujson:
+        return ujson.loads(data)
+    return json.loads(data)
+
 import logging
 import os
 import random
@@ -943,8 +960,8 @@ class SessionDB:
             msg = dict(row)
             if msg.get("tool_calls"):
                 try:
-                    msg["tool_calls"] = json.loads(msg["tool_calls"])
-                except (json.JSONDecodeError, TypeError):
+                    msg["tool_calls"] = _fast_json_loads(msg["tool_calls"])
+                except (ValueError, TypeError):
                     pass
             result.append(msg)
         return result
@@ -971,8 +988,8 @@ class SessionDB:
                 msg["tool_name"] = row["tool_name"]
             if row["tool_calls"]:
                 try:
-                    msg["tool_calls"] = json.loads(row["tool_calls"])
-                except (json.JSONDecodeError, TypeError):
+                    msg["tool_calls"] = _fast_json_loads(row["tool_calls"])
+                except (ValueError, TypeError):
                     pass
             # Restore reasoning fields on assistant messages so providers
             # that replay reasoning (OpenRouter, OpenAI, Nous) receive
@@ -982,13 +999,13 @@ class SessionDB:
                     msg["reasoning"] = row["reasoning"]
                 if row["reasoning_details"]:
                     try:
-                        msg["reasoning_details"] = json.loads(row["reasoning_details"])
-                    except (json.JSONDecodeError, TypeError):
+                        msg["reasoning_details"] = _fast_json_loads(row["reasoning_details"])
+                    except (ValueError, TypeError):
                         pass
                 if row["codex_reasoning_items"]:
                     try:
-                        msg["codex_reasoning_items"] = json.loads(row["codex_reasoning_items"])
-                    except (json.JSONDecodeError, TypeError):
+                        msg["codex_reasoning_items"] = _fast_json_loads(row["codex_reasoning_items"])
+                    except (ValueError, TypeError):
                         pass
             messages.append(msg)
         return messages
