@@ -49,7 +49,7 @@ T = TypeVar("T")
 
 DEFAULT_DB_PATH = get_hermes_home() / "state.db"
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS schema_version (
@@ -121,6 +121,22 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 
 CREATE INDEX IF NOT EXISTS idx_audit_log_session ON audit_log(session_id, timestamp);
+
+CREATE TABLE IF NOT EXISTS digest_items (
+    id TEXT PRIMARY KEY,
+    source TEXT NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    url TEXT NOT NULL,
+    content TEXT,
+    fetched_at REAL NOT NULL,
+    score REAL,
+    reasoning TEXT,
+    status TEXT NOT NULL DEFAULT 'pending'
+);
+
+CREATE INDEX IF NOT EXISTS idx_digest_items_status ON digest_items(status);
+CREATE INDEX IF NOT EXISTS idx_digest_items_fetched_at ON digest_items(fetched_at DESC);
 
 """
 
@@ -381,6 +397,25 @@ class SessionDB:
                 ''')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_audit_log_session ON audit_log(session_id, timestamp)')
                 cursor.execute("UPDATE schema_version SET version = 7")
+            if current_version < 8:
+                # v8: add digest_items table for news/infosec digest pipeline
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS digest_items (
+                        id TEXT PRIMARY KEY,
+                        source TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        title TEXT NOT NULL,
+                        url TEXT NOT NULL,
+                        content TEXT,
+                        fetched_at REAL NOT NULL,
+                        score REAL,
+                        reasoning TEXT,
+                        status TEXT NOT NULL DEFAULT 'pending'
+                    )
+                ''')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_digest_items_status ON digest_items(status)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_digest_items_fetched_at ON digest_items(fetched_at DESC)')
+                cursor.execute("UPDATE schema_version SET version = 8")
 
 
         # Unique title index — always ensure it exists (safe to run after migrations

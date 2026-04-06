@@ -1,0 +1,25 @@
+{
+  "sources": [
+    {
+      "id": "hackernews",
+      "type": "api",
+      "name": "HackerNews",
+      "url": "https://hacker-news.firebaseio.com/v0/topstories.json",
+      "enabled": true
+    },
+    {
+      "id": "arxiv",
+      "type": "rss",
+      "name": "arXiv CS/ML/Security",
+      "url": "http://export.arxiv.org/api/query?search_query=cat:cs.CR+OR+cat:cs.LG+OR+cat:cs.AI&sortBy=lastUpdatedDate&sortOrder=descending&max_results=50",
+      "enabled": true
+    },
+    {
+      "id": "cisa_kev",
+      "type": "json",
+      "name": "CISA KEV",
+      "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+      "enabled": true
+    }
+  ]
+}
