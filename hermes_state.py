@@ -49,7 +49,7 @@ T = TypeVar("T")
 
 DEFAULT_DB_PATH = get_hermes_home() / "state.db"
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS schema_version (
@@ -106,6 +106,22 @@ CREATE INDEX IF NOT EXISTS idx_sessions_source ON sessions(source);
 CREATE INDEX IF NOT EXISTS idx_sessions_parent ON sessions(parent_session_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_started ON sessions(started_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id, timestamp);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL REFERENCES sessions(id),
+    action_type TEXT NOT NULL,
+    timestamp REAL NOT NULL,
+    intent_category TEXT,
+    tool_name TEXT,
+    failure_reason TEXT,
+    memory_hit INTEGER,
+    user_feedback TEXT,
+    context TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_session ON audit_log(session_id, timestamp);
+
 """
 
 FTS_SQL = """
@@ -347,6 +363,25 @@ class SessionDB:
                     except sqlite3.OperationalError:
                         pass  # Column already exists
                 cursor.execute("UPDATE schema_version SET version = 6")
+            if current_version < 7:
+                # v7: add audit_log table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS audit_log (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        session_id TEXT NOT NULL REFERENCES sessions(id),
+                        action_type TEXT NOT NULL,
+                        timestamp REAL NOT NULL,
+                        intent_category TEXT,
+                        tool_name TEXT,
+                        failure_reason TEXT,
+                        memory_hit INTEGER,
+                        user_feedback TEXT,
+                        context TEXT
+                    )
+                ''')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_audit_log_session ON audit_log(session_id, timestamp)')
+                cursor.execute("UPDATE schema_version SET version = 7")
+
 
         # Unique title index — always ensure it exists (safe to run after migrations
         # since the title column is guaranteed to exist at this point)
@@ -1289,3 +1324,50 @@ class SessionDB:
             return len(session_ids)
 
         return self._execute_write(_do)
+
+
+class AuditLog:
+    """Helper class to log agent actions to the audit_log table."""
+    
+    def __init__(self, db: SessionDB):
+        self.db = db
+
+    def _log(self, session_id: str, action_type: str, **kwargs):
+        def _do(conn):
+            # Extract fields with defaults
+            intent_category = kwargs.get('intent_category')
+            tool_name = kwargs.get('tool_name')
+            failure_reason = kwargs.get('failure_reason')
+            memory_hit = kwargs.get('memory_hit')
+            user_feedback = kwargs.get('user_feedback')
+            context = kwargs.get('context')
+            
+            # Serialize context dict to JSON if present
+            context_json = json.dumps(context) if context is not None else None
+
+            conn.execute(
+                '''INSERT INTO audit_log 
+                   (session_id, action_type, timestamp, intent_category, tool_name, failure_reason, memory_hit, user_feedback, context)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (
+                    session_id,
+                    action_type,
+                    time.time(),
+                    intent_category,
+                    tool_name,
+                    failure_reason,
+                    memory_hit,
+                    user_feedback,
+                    context_json
+                )
+            )
+        self.db._execute_write(_do)
+
+    def log_decision(self, session_id: str, intent_category: str, context: dict = None):
+        self._log(session_id, action_type="decision", intent_category=intent_category, context=context)
+
+    def log_tool_execution(self, session_id: str, tool_name: str, failure_reason: str = None, context: dict = None):
+        self._log(session_id, action_type="tool_execution", tool_name=tool_name, failure_reason=failure_reason, context=context)
+
+    def log_memory_retrieve(self, session_id: str, memory_hit: bool, context: dict = None):
+        self._log(session_id, action_type="memory_retrieve", memory_hit=int(memory_hit), context=context)

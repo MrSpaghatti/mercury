@@ -822,7 +822,7 @@ class TestSchemaInit:
     def test_schema_version(self, db):
         cursor = db._conn.execute("SELECT version FROM schema_version")
         version = cursor.fetchone()[0]
-        assert version == 6
+        assert version == 7
 
     def test_title_column_exists(self, db):
         """Verify the title column was created in the sessions table."""
@@ -878,12 +878,12 @@ class TestSchemaInit:
         conn.commit()
         conn.close()
 
-        # Open with SessionDB — should migrate to v6
+        # Open with SessionDB — should migrate to v7
         migrated_db = SessionDB(db_path=db_path)
 
         # Verify migration
         cursor = migrated_db._conn.execute("SELECT version FROM schema_version")
-        assert cursor.fetchone()[0] == 6
+        assert cursor.fetchone()[0] == 7
 
         # Verify title column exists and is NULL for existing sessions
         session = migrated_db.get_session("existing")
@@ -1262,3 +1262,83 @@ class TestConcurrentWriteSafety:
         assert "30" in src, (
             "SQLite timeout should be at least 30s to handle CLI/gateway lock contention"
         )
+
+
+# =========================================================================
+# Audit Log
+# =========================================================================
+
+class TestAuditLog:
+    def test_log_decision(self, db):
+        from hermes_state import AuditLog
+        import json
+        
+        db.create_session("s1", "cli")
+        audit = AuditLog(db)
+        
+        audit.log_decision("s1", intent_category="test_intent", context={"key": "value"})
+        
+        cursor = db._conn.execute("SELECT * FROM audit_log WHERE session_id = 's1'")
+        rows = cursor.fetchall()
+        assert len(rows) == 1
+        
+        row = rows[0]
+        assert row["action_type"] == "decision"
+        assert row["intent_category"] == "test_intent"
+        assert json.loads(row["context"]) == {"key": "value"}
+        assert row["tool_name"] is None
+        assert row["failure_reason"] is None
+        assert row["memory_hit"] is None
+
+    def test_log_tool_execution_success(self, db):
+        from hermes_state import AuditLog
+        
+        db.create_session("s1", "cli")
+        audit = AuditLog(db)
+        
+        audit.log_tool_execution("s1", tool_name="my_tool")
+        
+        cursor = db._conn.execute("SELECT * FROM audit_log WHERE session_id = 's1'")
+        rows = cursor.fetchall()
+        assert len(rows) == 1
+        
+        row = rows[0]
+        assert row["action_type"] == "tool_execution"
+        assert row["tool_name"] == "my_tool"
+        assert row["failure_reason"] is None
+
+    def test_log_tool_execution_failure(self, db):
+        from hermes_state import AuditLog
+        
+        db.create_session("s1", "cli")
+        audit = AuditLog(db)
+        
+        audit.log_tool_execution("s1", tool_name="bad_tool", failure_reason="timeout")
+        
+        cursor = db._conn.execute("SELECT * FROM audit_log WHERE session_id = 's1'")
+        rows = cursor.fetchall()
+        assert len(rows) == 1
+        
+        row = rows[0]
+        assert row["action_type"] == "tool_execution"
+        assert row["tool_name"] == "bad_tool"
+        assert row["failure_reason"] == "timeout"
+
+    def test_log_memory_retrieve(self, db):
+        from hermes_state import AuditLog
+        
+        db.create_session("s1", "cli")
+        audit = AuditLog(db)
+        
+        audit.log_memory_retrieve("s1", memory_hit=True)
+        audit.log_memory_retrieve("s1", memory_hit=False)
+        
+        cursor = db._conn.execute("SELECT * FROM audit_log WHERE session_id = 's1' ORDER BY id")
+        rows = cursor.fetchall()
+        assert len(rows) == 2
+        
+        assert rows[0]["action_type"] == "memory_retrieve"
+        assert rows[0]["memory_hit"] == 1
+        
+        assert rows[1]["action_type"] == "memory_retrieve"
+        assert rows[1]["memory_hit"] == 0
