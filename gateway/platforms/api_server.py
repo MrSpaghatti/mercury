@@ -86,6 +86,9 @@ class ResponseStore:
             )"""
         )
         self._conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_responses_accessed_at ON responses (accessed_at)"
+        )
+        self._conn.execute(
             """CREATE TABLE IF NOT EXISTS conversations (
                 name TEXT PRIMARY KEY,
                 response_id TEXT NOT NULL
@@ -111,19 +114,22 @@ class ResponseStore:
     def put(self, response_id: str, data: Dict[str, Any]) -> None:
         """Store a response, evicting the oldest if at capacity."""
         import time
-        self._conn.execute(
-            "INSERT OR REPLACE INTO responses (response_id, data, accessed_at) VALUES (?, ?, ?)",
-            (response_id, json.dumps(data, default=str), time.time()),
-        )
-        # Evict oldest entries beyond max_size
-        count = self._conn.execute("SELECT COUNT(*) FROM responses").fetchone()[0]
-        if count > self._max_size:
+        now = time.time()
+        json_data = json.dumps(data, default=str)
+        with self._conn:
             self._conn.execute(
-                "DELETE FROM responses WHERE response_id IN "
-                "(SELECT response_id FROM responses ORDER BY accessed_at ASC LIMIT ?)",
-                (count - self._max_size,),
+                "INSERT OR REPLACE INTO responses (response_id, data, accessed_at) VALUES (?, ?, ?)",
+                (response_id, json_data, now),
             )
-        self._conn.commit()
+            # Evict oldest entries beyond max_size. Use LIMIT to handle cases where we
+            # significantly exceed capacity (e.g. max_size was decreased).
+            count = self._conn.execute("SELECT COUNT(*) FROM responses").fetchone()[0]
+            if count > self._max_size:
+                self._conn.execute(
+                    "DELETE FROM responses WHERE response_id IN "
+                    "(SELECT response_id FROM responses ORDER BY accessed_at ASC LIMIT ?)",
+                    (count - self._max_size,),
+                )
 
     def delete(self, response_id: str) -> bool:
         """Remove a response from the store. Returns True if found and deleted."""
