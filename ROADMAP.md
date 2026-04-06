@@ -1,6 +1,7 @@
 # North Star Implementation Roadmap
 
 **Baseline:** `baseline-north-star-v0` (commit 214f2da8)  
+**Current HEAD:** `da0b3bb3` (Phase 1 complete, all foundation live)  
 **Program:** `program.md` — defines optimization axes and gating criteria  
 
 ---
@@ -14,11 +15,11 @@
 
 ### 🔄 In Flight (Jules Sessions)
 
-| Priority | Task | Jules ID | Status | ETA |
-|----------|------|----------|--------|-----|
+| Priority | Task | Jules ID | Status | Commit |
+|----------|------|----------|--------|--------|
 | 3.1 | Implement audit_log table in hermes_state.py | 13652758914226909608 | ✅ Completed | 77b3efea |
 | 3.2 | xMemory Stage I/II retrieval in stack.py | 5783766652620636935 | ✅ Completed | 36be14a8 |
-| 3.3 | Subprocess sandboxing (bwrap/seccomp) | 1952571512354332496 | In Progress | — |
+| 3.3 | Subprocess sandboxing (bwrap/seccomp) | 1952571512354332496 | ✅ Completed | da0b3bb3 |
 | 3.4 | Memory health check cron script | 5136199449893976380 | ✅ Completed | 36be14a8 |
 
 ### 📋 Phase 2: Eval Harness & Integration (Correct Sequencing)
@@ -64,7 +65,14 @@
 
 ## Phase 2: Meta-Agent Loop (Design Phase)
 
-- [ ] Build evolution proposal pipeline (HF papers API polling)
+- [ ] **Evolution Proposals Pipeline** (detailed in Phase 3.1 backlog):
+  - HF Daily Papers API polling (daily cron, filters tags: agent memory, RAG, tool-use, context compression, inference efficiency)
+  - Haiku-class relevance filter (threshold 0.6, hard gates: no CUDA-only, no >32GB VRAM, no proprietary APIs, code must exist 2+ weeks)
+  - Sonnet-class applicability analyzer (maps to components, estimates effort/delta)
+  - Proposal writing to `proposals/YYYY-MM-DD-paper-slug.md`
+  - Telegram gate for human review (approve/reject/defer)
+  - Approved proposals enter autoagent eval-gated loop
+
 - [ ] Implement autoagent hill-climbing loop (score-driven accept/reject)
 - [ ] Carnice-style local 8B fine-tune (once real conversation data exists)
 
