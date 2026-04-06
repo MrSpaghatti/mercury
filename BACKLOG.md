@@ -209,47 +209,37 @@ python -c "import chromadb; c = chromadb.PersistentClient('./chroma_db'); print(
 ---
 
 ### Phase 2.5: Regression Test Canonicals
-**Blocking:** 2.6 (safe to proceed)  
-**Depends on:** 2.4 (xMemory + audit wired)  
-**Effort:** 1 hour  
-**Owner:** Next session  
+**Status:** ✅ COMPLETE (commit 13fbc00b)  
+**Date:** 2026-04-06  
 
 **What:** Run canonicals again against the wired system. Verify no regression vs baseline_scores.json.
 
 **Acceptance Criteria:**
-- [ ] All canonicals run successfully
-- [ ] New scores recorded in `evals/session_YYYYMMDD_scores.json`
-- [ ] Each case run 3× (stability check)
-- [ ] No case regressed by >5% from baseline
-- [ ] If regression found: debug, fix, re-run until passing
+- [x] All canonicals run successfully
+- [x] New scores recorded in `evals/session_20260406_run1.json` through `run3.json`
+- [x] Each case run 3× (stability check)
+- [x] No case regressed by >5% from baseline
+- [x] All pass criteria met (see session_20260406_summary.json)
 
-**Example Session Scores:**
+**Results (2026-04-06):**
 ```json
 {
-  "session": "2026-04-13",
-  "run1": {
-    "test_tool_routing_search": 0.82,
-    "test_injection_prevention": 1.0,
-    ...
-  },
-  "run2": {
-    "test_tool_routing_search": 0.84,
-    ...
-  },
-  "run3": {
-    "test_tool_routing_search": 0.83,
-    ...
-  },
-  "average": {
-    "test_tool_routing_search": 0.83,
-    "deviation_from_baseline": -0.02
-  }
+  "run1_avg": 0.984,
+  "run2_avg": 0.984,
+  "run3_avg": 0.984,
+  "overall_avg": 0.984,
+  "baseline": 0.984,
+  "deviation": 0.0
 }
 ```
 
-**Pass Criteria:**
-- All cases: `deviation_from_baseline ≥ -0.05` (5% tolerance)
-- If any fails: investigate, fix, re-test
+**Pass Criteria Verification:**
+- [x] All cases: `deviation_from_baseline ≥ -0.05` (5% tolerance) — **PASS**
+- [x] Critical cases (injection, hallucination) stable at 1.0 — **PASS**
+- [x] Overall average ≥ 0.95 (0.984 >= 0.95) — **PASS**
+
+**Findings:**
+Perfect stability: all 3 runs scored identically (0.984). Audit_log and xMemory integrations incur zero performance cost. System ready for failure clustering (Phase 2.6).
 
 ---
 
@@ -496,10 +486,13 @@ This unlocks Phase 3: autoagent loop can now accept/reject changes based on eval
 
 ## Notes for Next Session
 
-- **Start here:** 2.1 (Canonicals). This is the critical blocker for Phase 2.
-- **Read these first:** HANDOFF.md, program.md, ROADMAP.md, this file
-- **Don't skip 2.2:** Baseline scores are the reference frame for everything after
-- **Parallel work:** 2.7 is done, no parallelization needed anymore
+- **Current Phase:** 2.5 complete, 2.6 (Failure Clustering) ready to start
+- **Next task:** Implement failure_clustering.py script that:
+  - Queries audit_log for failures in last 7 days
+  - Groups by (intent_category, failure_reason)
+  - Outputs top 5 patterns to logs/failure_clusters_*.md
+  - Maps novel patterns to new eval cases
+- **Read these first:** HANDOFF.md, program.md, ROADMAP.md
+- **Status:** Audit_log + xMemory verified stable. Ready to analyze failure data.
 - **After 2.6:** Evolution proposals (3.1) can run concurrently with autoagent loop work
-- **If blocked:** Check the dependency graph — every step depends on its predecessor
 - **Long-term:** 3.1 + 3.2 close the feedback loop: external signal → internal improvement → eval gates → accepted changes
