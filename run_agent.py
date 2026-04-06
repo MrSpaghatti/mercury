@@ -5858,6 +5858,21 @@ class AIAgent:
                 tier = "⚠️  WARNING" if remaining <= self.max_iterations * 0.1 else "💡 CAUTION"
                 print(f"{self.log_prefix}{tier}: {remaining} iterations remaining")
 
+    def _interruptible_sleep(self, duration: float, check_interval: float = 0.1) -> None:
+        """Sleep for a given duration while periodically checking for interrupts.
+
+        Args:
+            duration: Total time to sleep in seconds.
+            check_interval: How often to wake up and check self._interrupt_requested.
+        """
+        end_time = time.time() + duration
+        while time.time() < end_time:
+            if self._interrupt_requested:
+                break
+            sleep_time = min(check_interval, end_time - time.time())
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+
     def _execute_tool_calls_sequential(self, assistant_message, messages: list, effective_task_id: str, api_call_count: int = 0) -> None:
         """Execute tool calls sequentially (original behavior). Used for single calls or interactive tools."""
         for i, tool_call in enumerate(assistant_message.tool_calls, 1):
@@ -6128,7 +6143,7 @@ class AIAgent:
                 break
 
             if self.tool_delay > 0 and i < len(assistant_message.tool_calls):
-                time.sleep(self.tool_delay)
+                self._interruptible_sleep(self.tool_delay)
 
         # ── Budget pressure injection ─────────────────────────────────
         # After all tool calls in this turn are processed, check if we're
