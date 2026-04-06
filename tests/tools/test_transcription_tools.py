@@ -404,6 +404,59 @@ class TestTranscribeLocalCommand:
         assert result["transcript"] == "hello from local command"
         assert result["provider"] == "local_command"
 
+    def test_command_injection_prevented(self, monkeypatch, tmp_path):
+        """Verify that shell injection characters in file_path are safely quoted and not executed."""
+        out_dir = tmp_path / "local-out"
+        out_dir.mkdir()
+
+        monkeypatch.setenv(
+            "HERMES_LOCAL_STT_COMMAND",
+            "whisper {input_path} --output_dir {output_dir}"
+        )
+        monkeypatch.setenv("HERMES_LOCAL_STT_LANGUAGE", "en")
+
+        def fake_tempdir(prefix=None):
+            class _TempDir:
+                def __enter__(self_inner):
+                    return str(out_dir)
+
+                def __exit__(self_inner, exc_type, exc, tb):
+                    return False
+
+            return _TempDir()
+
+        run_args = []
+        def fake_run(cmd, *args, **kwargs):
+            # Capture the list command passed to subprocess.run
+            run_args.append(cmd)
+            # Create a fake transcript so it doesn't fail
+            (out_dir / "test.txt").write_text("injection test", encoding="utf-8")
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+        monkeypatch.setattr("tools.transcription_tools.tempfile.TemporaryDirectory", fake_tempdir)
+        # Force preparation to bypass ffmpeg (for WAV inputs)
+        monkeypatch.setattr("tools.transcription_tools._prepare_local_audio", lambda path, workdir: (path, None))
+        monkeypatch.setattr("tools.transcription_tools.subprocess.run", fake_run)
+
+        from tools.transcription_tools import _transcribe_local_command
+
+        # The malicious filename
+        malicious_filename = "test\";rm -rf /;#.wav"
+
+        result = _transcribe_local_command(malicious_filename, "base")
+
+        assert result["success"] is True
+
+        assert len(run_args) == 1
+        cmd_list = run_args[0]
+
+        # Verify it's a list, not a string (shell=False requirement)
+        assert isinstance(cmd_list, list)
+
+        # Check that the first part is whisper, and the second is the literal malicious filename
+        assert cmd_list[0] == "whisper"
+        assert cmd_list[1] == malicious_filename
+
 
 # ============================================================================
 # _transcribe_local — additional tests
