@@ -68,10 +68,56 @@
 - [ ] **Evolution Proposals Pipeline** (detailed in Phase 3.1 backlog):
   - HF Daily Papers API polling (daily cron, filters tags: agent memory, RAG, tool-use, context compression, inference efficiency)
   - Haiku-class relevance filter (threshold 0.6, hard gates: no CUDA-only, no >32GB VRAM, no proprietary APIs, code must exist 2+ weeks)
+    - *Note: capability tier, not model name. Current: OpenRouter Haiku. Future: local 8B Q4 quant (ollama/llama.cpp + ROCm)*
   - Sonnet-class applicability analyzer (maps to components, estimates effort/delta)
+    - *Note: capability tier. Current: OpenRouter Sonnet. Future: local 32B Q4 once R9700 stable + trust built*
   - Proposal writing to `proposals/YYYY-MM-DD-paper-slug.md`
   - Telegram gate for human review (approve/reject/defer)
   - Approved proposals enter autoagent eval-gated loop
+
+---
+
+### Model Tier Policy (R9700 Era)
+
+**Guiding principle:** Prefer local inference (ROCm on Raven R9700, 32GB GDDR6) for high-volume, low-complexity tasks. Reserve OpenRouter (Sonnet-class) for complex reasoning chains and initial validation of new pipeline stages.
+
+**Current assignments** (before R9700):
+- Relevance filter: OpenRouter Haiku-class (binary relevance scoring)
+- Applicability analyzer: OpenRouter Sonnet-class (complex reasoning)
+- Failure clustering: manual analysis (future: local 8B)
+- Health check: local Python (no LLM yet)
+
+**Post-R9700 candidates:**
+- **Relevance filter** (high-volume, simple pattern matching): local 8B Q4 quant
+  - Task: score papers 0.0–1.0 against ecosystem tags
+  - Complexity: binary classification
+  - Volume: daily ~50–100 papers
+  - Cost savings: 100–200 papers × 0.1ms latency = huge savings vs OpenRouter
+
+- **Applicability analyzer** (medium-volume, moderate complexity): keep Sonnet initially, promote to local 32B Q4 once:
+  - R9700 is stable in production
+  - Fine-tune exists (trained on real paper→proposal examples)
+  - You have confidence in local model quality on new paper types
+
+- **Failure clustering summarization** (low-volume, pattern matching): local 8B
+  - Task: read SQL output, identify trends, suggest new eval cases
+  - Complexity: structured data analysis, not creative reasoning
+  - Volume: weekly, not real-time
+
+- **Health check contradiction detection** (low-volume, pattern matching): local 8B
+  - Task: find logical conflicts in stored episodes/semantics
+  - Complexity: semantic similarity, not complex reasoning
+  - Volume: weekly cron, <1 second latency acceptable
+
+**Re-evaluation schedule:**
+- Quarterly: measure local model quality on each stage
+- If local scores within 2% of OpenRouter: promote to local + remove OpenRouter calls
+- Track cost savings per stage (latency × volume × OpenRouter pricing)
+
+**Config abstraction:**
+- All model calls go through `hermes.models.ModelProvider` (not direct OpenRouter imports)
+- Provider reads `HF_TOKEN`, `OPENROUTER_API_KEY`, `LOCAL_MODEL_ENDPOINT` env vars
+- Can swap inference source (local vs remote) without code changes
 
 - [ ] Implement autoagent hill-climbing loop (score-driven accept/reject)
 - [ ] Carnice-style local 8B fine-tune (once real conversation data exists)

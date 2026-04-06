@@ -342,6 +342,7 @@ Path("logs/failure_clusters_YYYY-MM-DD.md").write_text(report)
    - Supplement with: arxiv RSS, Papers With Code, HF Spaces trending
 
 2. **Haiku-Class Relevance Filter**
+   - *Capability tier, not model name. Current: OpenRouter Haiku. Future: local 8B Q4 quant (ollama + ROCm)*
    - Score each paper against ecosystem tags:
      - High weight: agent memory, RAG, tool-use, context compression, inference efficiency
      - Medium weight: self-improvement, meta-learning, LLM routing
@@ -355,6 +356,7 @@ Path("logs/failure_clusters_YYYY-MM-DD.md").write_text(report)
    - Output: candidate papers for deeper analysis
 
 3. **Sonnet-Class Applicability Analyzer**
+   - *Capability tier. Current: OpenRouter Sonnet. Future: local 32B Q4 once R9700 stable + fine-tune exists*
    - Read: abstract + methodology section
    - Map to current components (memory, routing, sandboxing, harness, model, retrieval)
    - Output: affected_component, proposed_change, confidence, effort_estimate
@@ -408,12 +410,25 @@ Path("logs/failure_clusters_YYYY-MM-DD.md").write_text(report)
 
 **Acceptance Criteria:**
 - [ ] Polling cron runs daily, stores papers in SQLite
-- [ ] Haiku filter scores each paper, rejects <0.6
-- [ ] Sonnet analyzer generates proposal markdown
+- [ ] Haiku-class filter scores each paper, rejects <0.6
+- [ ] Sonnet-class analyzer generates proposal markdown
 - [ ] At least 3 proposals generated and written to `proposals/`
 - [ ] Telegram notifications functional
 - [ ] Human can approve/reject via Telegram
 - [ ] Approved proposals enter autoagent loop cleanly
+
+**Model Abstraction (Critical for R9700 transition):**
+- [ ] All inference calls go through `hermes.models.ModelProvider` abstraction (not direct API imports)
+- [ ] Relevance filter is configurable to swap between:
+  - OpenRouter Haiku (current)
+  - Local ollama endpoint (future, env var `LOCAL_MODEL_ENDPOINT`)
+  - Decision logic reads env: if `LOCAL_MODEL_ENDPOINT` is set, use local; else OpenRouter
+  - No code changes needed to swap, only config/env vars
+- [ ] Applicability analyzer same abstraction:
+  - OpenRouter Sonnet (current)
+  - Local 32B Q4 (future, once R9700 stable)
+  - Same ModelProvider abstraction, zero code changes to promote to local
+- [ ] Both models abstract the prompt format (different APIs → unified interface)
 
 **Verification:**
 ```bash
@@ -427,7 +442,18 @@ ls -la proposals/*.md  # should have 3+ files
 # (manual: receive Telegram notification, approve a proposal)
 ```
 
-**Result:** Evolution proposals flow continuously: papers → candidates → proposals → human gate → autoagent acceptance. The loop closes: external research signal → internal harness improvement.
+**Model Tier Strategy:**
+This backlog treats "Haiku-class" and "Sonnet-class" as **capability tiers, not literal model names**. The intent is to abstract away specific models so that once R9700 is live with ROCm 7.0, you can seamlessly swap to local inference for cost-sensitive tasks without refactoring.
+
+**Current (pre-R9700):** OpenRouter APIs (Haiku for filter, Sonnet for analyzer)  
+**Post-R9700 roadmap:**
+- Relevance filter (binary scoring, high-volume): promote to local 8B Q4 quant immediately (huge cost savings)
+- Applicability analyzer (complex reasoning, medium-volume): keep Sonnet initially, promote to local 32B Q4 once you have a fine-tune and have built confidence
+- Other stages (failure clustering, health checks): candidate for local inference as well
+
+The ModelProvider abstraction allows you to flip between local/remote with only config changes. See ROADMAP.md "Model Tier Policy" section for the full strategy.
+
+**Result:** Evolution proposals flow continuously: papers → candidates → proposals → human gate → autoagent acceptance. The loop closes: external research signal → internal harness improvement. Model costs stay low via local inference post-R9700.
 
 ---
 
