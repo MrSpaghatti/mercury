@@ -107,7 +107,6 @@ def _run_async(coro):
 
     if loop and loop.is_running():
         # Inside an async context (gateway, RL env) — run in a fresh thread.
-        import concurrent.futures
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
             future = pool.submit(asyncio.run, coro)
             return future.result(timeout=300)

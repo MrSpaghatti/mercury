@@ -8,6 +8,7 @@ persistence via bind mounts.
 import logging
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -509,10 +510,12 @@ class DockerEnvironment(BaseEnvironment):
         """Stop and remove the container. Bind-mount dirs persist if persistent=True."""
         if self._container_id:
             try:
+                exe = shlex.quote(self._docker_exe)
+                cid = shlex.quote(self._container_id)
                 # Stop in background so cleanup doesn't block
                 stop_cmd = (
-                    f"(timeout 60 {self._docker_exe} stop {self._container_id} || "
-                    f"{self._docker_exe} rm -f {self._container_id}) >/dev/null 2>&1 &"
+                    f"(timeout 60 {exe} stop {cid} || "
+                    f"{exe} rm -f {cid}) >/dev/null 2>&1 &"
                 )
                 subprocess.Popen(stop_cmd, shell=True)
             except Exception as e:
@@ -521,8 +524,10 @@ class DockerEnvironment(BaseEnvironment):
             if not self._persistent:
                 # Also schedule removal (stop only leaves it as stopped)
                 try:
+                    exe = shlex.quote(self._docker_exe)
+                    cid = shlex.quote(self._container_id)
                     subprocess.Popen(
-                        f"sleep 3 && {self._docker_exe} rm -f {self._container_id} >/dev/null 2>&1 &",
+                        f"sleep 3 && {exe} rm -f {cid} >/dev/null 2>&1 &",
                         shell=True,
                     )
                 except Exception:

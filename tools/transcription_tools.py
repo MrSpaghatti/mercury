@@ -53,6 +53,9 @@ DEFAULT_LOCAL_MODEL = "base"
 DEFAULT_LOCAL_STT_LANGUAGE = "en"
 DEFAULT_STT_MODEL = os.getenv("STT_OPENAI_MODEL", "whisper-1")
 DEFAULT_GROQ_STT_MODEL = os.getenv("STT_GROQ_MODEL", "whisper-large-v3-turbo")
+# Note: HERMES_LOCAL_STT_COMMAND no longer supports shell features like pipes or redirects
+# to prevent command injection. If you need them, wrap the command explicitly:
+# HERMES_LOCAL_STT_COMMAND="bash -c 'ffmpeg -i {input_path} ... | some-filter ...'"
 LOCAL_STT_COMMAND_ENV = "HERMES_LOCAL_STT_COMMAND"
 LOCAL_STT_LANGUAGE_ENV = "HERMES_LOCAL_STT_LANGUAGE"
 COMMON_LOCAL_BIN_DIRS = ("/opt/homebrew/bin", "/usr/local/bin")
@@ -323,7 +326,13 @@ def _prepare_local_audio(file_path: str, work_dir: str) -> tuple[Optional[str], 
 
 
 def _transcribe_local_command(file_path: str, model_name: str) -> Dict[str, Any]:
-    """Run the configured local STT command template and read back a .txt transcript."""
+    """Run the configured local STT command template and read back a .txt transcript.
+    
+    Security note: To prevent command injection, the command is executed with shell=False.
+    Shell features like pipes (|) or variable expansion ($VAR) in HERMES_LOCAL_STT_COMMAND 
+    are no longer supported. If you need them, you must wrap the command explicitly,
+    e.g. HERMES_LOCAL_STT_COMMAND="bash -c 'whisper {input_path} | grep something'".
+    """
     command_template = _get_local_command_template()
     if not command_template:
         return {
@@ -343,13 +352,14 @@ def _transcribe_local_command(file_path: str, model_name: str) -> Dict[str, Any]
             if prep_error:
                 return {"success": False, "transcript": "", "error": prep_error}
 
-            command = command_template.format(
+            command_str = command_template.format(
                 input_path=shlex.quote(prepared_input),
                 output_dir=shlex.quote(output_dir),
                 language=shlex.quote(language),
                 model=shlex.quote(normalized_model),
             )
-            subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+            command_list = shlex.split(command_str)
+            subprocess.run(command_list, shell=False, check=True, capture_output=True, text=True)
 
             txt_files = sorted(Path(output_dir).glob("*.txt"))
             if not txt_files:

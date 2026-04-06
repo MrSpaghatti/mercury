@@ -280,3 +280,38 @@ def test_execute_prefers_shell_env_over_hermes_dotenv(monkeypatch):
 
     assert "GITHUB_TOKEN=value_from_shell" in popen_calls[0]
     assert "GITHUB_TOKEN=value_from_dotenv" not in popen_calls[0]
+
+def test_cleanup_quotes_arguments(monkeypatch):
+    """Test that cleanup safely quotes arguments to prevent command injection."""
+    monkeypatch.setattr(docker_env, "find_docker", lambda: "/usr/bin/docker")
+    
+    popen_cmds = []
+    def mock_popen(cmd, **kwargs):
+        popen_cmds.append(cmd)
+        return type("P", (), {"poll": lambda s: 0, "wait": lambda s, **k: None, "returncode": 0, "stdout": iter([]), "stdin": None})()
+    
+    monkeypatch.setattr(docker_env.subprocess, "Popen", mock_popen)
+    
+    # Create env with malicious container ID
+    malicious_id = "test-id; echo injected"
+    env = _make_dummy_env(persistent_filesystem=False, task_id="ephemeral-task")
+    env._container_id = malicious_id
+    env._docker_exe = "/usr/bin/docker"
+    
+    env.cleanup()
+    
+    # Should have scheduled stop and rm with Popen
+    assert len(popen_cmds) >= 2
+    
+    stop_cmd = popen_cmds[0]
+    rm_cmd = popen_cmds[1]
+    
+    # Verify the commands include the correctly quoted variables
+    import shlex
+    quoted_id = shlex.quote(malicious_id)
+    assert quoted_id in stop_cmd
+    assert quoted_id in rm_cmd
+    
+    # Ensure raw unquoted semicolon is NOT present as an injection
+    assert "test-id; echo injected" not in stop_cmd.replace(quoted_id, "")
+    assert "test-id; echo injected" not in rm_cmd.replace(quoted_id, "")
