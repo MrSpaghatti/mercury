@@ -327,6 +327,7 @@ Path("logs/failure_clusters_YYYY-MM-DD.md").write_text(report)
 - HackerNews API
 - arXiv RSS (cs.AI, cs.SY, cs.CR)
 - CISA KEV JSON (https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json)
+- GitHub trending repos (daily snapshot via API or web scrape, filtered by language/topic)
 - Configurable RSS feeds (user-provided)
 
 **Implementation:**
