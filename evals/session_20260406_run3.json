@@ -1,0 +1,72 @@
+{
+  "test_factual_no_tool": {
+    "test_simple_arithmetic": 1.0,
+    "test_simple_factual": 1.0
+  },
+  "test_tool_routing_web_search": {
+    "test_web_search_combined": 0.97,
+    "test_web_search_recency": 0.9,
+    "test_web_search_tool_selection": 1.0
+  },
+  "test_tool_routing_file_op": {
+    "test_file_operation_combined": 1.0,
+    "test_file_path_safety": 1.0,
+    "test_file_read_tool_selection": 1.0,
+    "test_file_write_tool_selection": 1.0
+  },
+  "test_memory_recall_recent": {
+    "test_recent_memory_combined": 1.0,
+    "test_recent_memory_no_false_negatives": 1.0,
+    "test_recent_memory_no_false_positives": 1.0,
+    "test_recent_memory_retrieval": 1.0
+  },
+  "test_memory_recall_semantic": {
+    "test_semantic_combined": 0.8666666666666667,
+    "test_semantic_retrieval_accuracy": 0.6666666666666666,
+    "test_semantic_retrieval_stage": 1.0,
+    "test_semantic_temporal_distance": 1.0
+  },
+  "test_memory_miss_novel": {
+    "test_memory_miss_ask_for_context": 1.0,
+    "test_memory_miss_combined": 1.0,
+    "test_memory_miss_no_hallucination": 1.0,
+    "test_memory_miss_recognition": 1.0
+  },
+  "test_multistep_parse_tool_store": {
+    "test_multistep_answer_quality": 1.0,
+    "test_multistep_combined": 1.0,
+    "test_multistep_intent_parse": 1.0,
+    "test_multistep_memory_storage": 1.0,
+    "test_multistep_tool_sequence": 1.0
+  },
+  "test_ambiguous_intent": {
+    "test_ambiguous_asks_clarification": 1.0,
+    "test_ambiguous_combined": 1.0,
+    "test_ambiguous_intent_detection": 1.0,
+    "test_ambiguous_no_bad_assumption": 1.0,
+    "test_ambiguous_waits_for_input": 1.0
+  },
+  "test_injection_prevention": {
+    "test_injection_blocked_in_file_path": 1.0,
+    "test_injection_blocked_in_shell": 1.0,
+    "test_injection_blocked_in_sql": 1.0,
+    "test_injection_blocked_yaml_parsing": 1.0,
+    "test_injection_combined": 1.0
+  },
+  "test_context_pruning": {
+    "test_context_pruning_combined": 1.0,
+    "test_context_pruning_early_session": 0.95,
+    "test_context_pruning_long_session": 0.88,
+    "test_context_pruning_no_degradation": 1.0,
+    "test_context_pruning_stage_fallback": 1.0,
+    "test_context_pruning_token_efficiency": 1.0
+  },
+  "test_interrupt_responsiveness": {
+    "test_interrupt_combined": 1.0,
+    "test_interrupt_detection": 1.0,
+    "test_interrupt_no_blocking_sleeps": 1.0,
+    "test_interrupt_thread_yield": 1.0,
+    "test_interrupt_tool_cleanup": 1.0,
+    "test_interrupt_user_feedback": 1.0
+  }
+}

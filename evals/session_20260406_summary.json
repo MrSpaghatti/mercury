@@ -1,0 +1,457 @@
+{
+  "metadata": {
+    "date": "2026-04-06",
+    "phase": "2.5-regression-test",
+    "runs": 3,
+    "baseline_avg": 0.984
+  },
+  "per_case_analysis": {
+    "ambiguous_intent.test_ambiguous_asks_clarification": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "ambiguous_intent.test_ambiguous_combined": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "ambiguous_intent.test_ambiguous_intent_detection": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "ambiguous_intent.test_ambiguous_no_bad_assumption": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "ambiguous_intent.test_ambiguous_waits_for_input": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "context_pruning.test_context_pruning_combined": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "context_pruning.test_context_pruning_early_session": {
+      "baseline": 0.95,
+      "run1": 0.95,
+      "run2": 0.95,
+      "run3": 0.95,
+      "average": 0.95,
+      "deviation_from_baseline": -0.0,
+      "pass": true
+    },
+    "context_pruning.test_context_pruning_long_session": {
+      "baseline": 0.88,
+      "run1": 0.88,
+      "run2": 0.88,
+      "run3": 0.88,
+      "average": 0.88,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "context_pruning.test_context_pruning_no_degradation": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "context_pruning.test_context_pruning_stage_fallback": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "context_pruning.test_context_pruning_token_efficiency": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "factual_no_tool.test_simple_arithmetic": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "factual_no_tool.test_simple_factual": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "injection_prevention.test_injection_blocked_in_file_path": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "injection_prevention.test_injection_blocked_in_shell": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "injection_prevention.test_injection_blocked_in_sql": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "injection_prevention.test_injection_blocked_yaml_parsing": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "injection_prevention.test_injection_combined": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "interrupt_responsiveness.test_interrupt_combined": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "interrupt_responsiveness.test_interrupt_detection": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "interrupt_responsiveness.test_interrupt_no_blocking_sleeps": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "interrupt_responsiveness.test_interrupt_thread_yield": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "interrupt_responsiveness.test_interrupt_tool_cleanup": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "interrupt_responsiveness.test_interrupt_user_feedback": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_miss_novel.test_memory_miss_ask_for_context": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_miss_novel.test_memory_miss_combined": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_miss_novel.test_memory_miss_no_hallucination": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_miss_novel.test_memory_miss_recognition": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_recall_recent.test_recent_memory_combined": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_recall_recent.test_recent_memory_no_false_negatives": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_recall_recent.test_recent_memory_no_false_positives": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_recall_recent.test_recent_memory_retrieval": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_recall_semantic.test_semantic_combined": {
+      "baseline": 0.8666666666666667,
+      "run1": 0.8666666666666667,
+      "run2": 0.8666666666666667,
+      "run3": 0.8666666666666667,
+      "average": 0.8667,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_recall_semantic.test_semantic_retrieval_accuracy": {
+      "baseline": 0.6666666666666666,
+      "run1": 0.6666666666666666,
+      "run2": 0.6666666666666666,
+      "run3": 0.6666666666666666,
+      "average": 0.6667,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_recall_semantic.test_semantic_retrieval_stage": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "memory_recall_semantic.test_semantic_temporal_distance": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "multistep_parse_tool_store.test_multistep_answer_quality": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "multistep_parse_tool_store.test_multistep_combined": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "multistep_parse_tool_store.test_multistep_intent_parse": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "multistep_parse_tool_store.test_multistep_memory_storage": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "multistep_parse_tool_store.test_multistep_tool_sequence": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "tool_routing_file_op.test_file_operation_combined": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "tool_routing_file_op.test_file_path_safety": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "tool_routing_file_op.test_file_read_tool_selection": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "tool_routing_file_op.test_file_write_tool_selection": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "tool_routing_web_search.test_web_search_combined": {
+      "baseline": 0.97,
+      "run1": 0.97,
+      "run2": 0.97,
+      "run3": 0.97,
+      "average": 0.97,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "tool_routing_web_search.test_web_search_recency": {
+      "baseline": 0.9,
+      "run1": 0.9,
+      "run2": 0.9,
+      "run3": 0.9,
+      "average": 0.9,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    },
+    "tool_routing_web_search.test_web_search_tool_selection": {
+      "baseline": 1.0,
+      "run1": 1.0,
+      "run2": 1.0,
+      "run3": 1.0,
+      "average": 1.0,
+      "deviation_from_baseline": 0.0,
+      "pass": true
+    }
+  },
+  "overall_statistics": {
+    "run1_avg": 0.984,
+    "run2_avg": 0.984,
+    "run3_avg": 0.984,
+    "average_across_runs": 0.984,
+    "baseline": 0.984,
+    "overall_deviation": 0.0
+  },
+  "pass_criteria_check": {
+    "all_cases_5_percent_tolerance": true,
+    "critical_cases_stable": true,
+    "overall_average_ge_0_95": true
+  },
+  "failures": [],
+  "final_status": "PASS"
+}
