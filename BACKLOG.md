@@ -313,6 +313,137 @@ Path("logs/failure_clusters_YYYY-MM-DD.md").write_text(report)
 
 ---
 
+## Phase 4: Scheduled & Proactive Features
+
+### Phase 4.1: News/Infosec Digest
+**Blocking:** None  
+**Depends on:** Magpie online (for RSS server)  
+**Effort:** ~4h  
+**Owner:** TBD  
+
+**What:** Daily automated news/security digest: aggregate HackerNews, arXiv, CISA KEV, and configurable RSS feeds; score each item against interest profile before surfacing.
+
+**Sources:**
+- HackerNews API
+- arXiv RSS (cs.AI, cs.SY, cs.CR)
+- CISA KEV JSON (https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json)
+- Configurable RSS feeds (user-provided)
+
+**Implementation:**
+- Claude (Haiku-class) acts as relevance filter: score each item against interest profile (infosec, systems, AI/ML, homelab)
+- NOT a raw dumper — only surface items above relevance threshold
+- CISA KEV: requires bridge script (JSON→RSS via feedgen, run as systemd timer)
+- Serve locally on Magpie (cached RSS feed)
+
+**Delivery:**
+- Morning digest push to Telegram on schedule (configurable time)
+- On-demand `/digest` command in chat
+
+**Acceptance Criteria:**
+- [ ] Feed sources configured and accessible
+- [ ] Claude relevance filter scores items 0.0–1.0 against interest profile
+- [ ] CISA KEV bridge script written + systemd timer active
+- [ ] Digest pushed to Telegram on schedule
+- [ ] At least 5 items per digest, filtered to ≥0.7 relevance
+
+---
+
+### Phase 4.2: Homelab Health Alerts
+**Blocking:** None  
+**Depends on:** Magpie/LXC network access  
+**Effort:** ~2h  
+**Owner:** TBD  
+
+**What:** Monitor homelab services; detect anomalies; push alerts to Telegram.
+
+**Services to monitor:**
+- Headscale (VPN/wireguard controller)
+- Gitea (code hosting)
+- Vaultwarden (password manager)
+- Crow/ChromaDB (vector DB)
+- SearXNG (search aggregator)
+- FastAPI endpoint(s)
+
+**Policy:**
+- Execute and flag anomalies, never ask before running
+- Never silently drop errors — log all failures
+- Lightweight ping/HTTP check loop (not full Gatus deploy)
+
+**Delivery:**
+- Telegram push alert on anomaly (e.g., service down, response time >5s)
+- Daily "all green" summary message
+
+**Implementation:**
+- Small Python loop in LXC that polls each service every 5–10 minutes
+- HTTP GET + timeout handling
+- Store state in SQLite (for trend detection)
+- Alert if service flips down or latency spikes
+
+**Acceptance Criteria:**
+- [ ] Monitoring loop runs in background (daemon)
+- [ ] All 6 services checked every 5–10 min
+- [ ] Anomalies pushed to Telegram within 30 seconds
+- [ ] Daily summary sent (all green or status list)
+- [ ] Error logging comprehensive (no silent failures)
+
+---
+
+### Phase 4.3: Obsidian Vault Read Access
+**Blocking:** None  
+**Depends on:** Magpie online (MoCA adapter pending)  
+**Effort:** ~2h  
+**Owner:** TBD  
+
+**What:** Bot should be able to query the Obsidian vault as a knowledge source (read-only).
+
+**Sync method:**
+- Syncthing or git pull from Gitea (vault already lives on Magpie)
+- Periodic sync (hourly or on-demand)
+
+**Scope:**
+- Read-only access to vault notes
+- Bot cannot write to vault directly
+- The Karpathy health check recompilation layer handles any writes
+
+**Integration:**
+- Make vault queryable via memory/xMemory retrieval
+- Treat vault notes as additional context source alongside episodes/semantics
+
+**Acceptance Criteria:**
+- [ ] Vault synced to bot host (Syncthing or git)
+- [ ] Vault notes indexed and queryable
+- [ ] `/vault <query>` command returns relevant notes
+- [ ] Read-only constraint enforced
+- [ ] Integration with xMemory retrieval (combine vault + episode context)
+
+---
+
+### Phase 4.4: Model Spend Tracking
+**Blocking:** None  
+**Depends on:** OpenRouter account configured  
+**Effort:** ~1h  
+**Owner:** TBD  
+
+**What:** Track Haiku-class vs Sonnet-class token spend per day via OpenRouter usage API; alert if daily spend exceeds threshold.
+
+**Implementation:**
+- Cron script (daily, 23:59 UTC): query OpenRouter `/auth/info` for usage stats
+- Parse by model/tier (group Haiku, Sonnet, etc.)
+- Compare against configurable daily threshold (e.g., $2.00)
+- Alert via Telegram if exceeded
+
+**Future note:**
+Once R9700 is live and local inference is stable, this flips to tracking local vs remote split (tokens/cost) rather than raw cost.
+
+**Acceptance Criteria:**
+- [ ] Script queries OpenRouter usage daily
+- [ ] Spend calculated per model tier
+- [ ] Telegram alert sent if threshold exceeded
+- [ ] Spend report logged to SQLite
+- [ ] Configuration for threshold (env var or config file)
+
+---
+
 ## Phase 3 Backlog Items
 
 ### Phase 3.1: Evolution Proposals Pipeline

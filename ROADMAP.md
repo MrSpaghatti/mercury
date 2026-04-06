@@ -65,6 +65,8 @@
 
 ## Phase 2: Meta-Agent Loop (Design Phase)
 
+**Model tier default will flip post-R9700:** Once ROCm 7.0 is stable on Raven, local inference becomes the default for all Haiku-class tasks. OpenRouter becomes the fallback, not the primary. The ModelProvider abstraction supports this with zero code changes — just env var swap.
+
 - [ ] **Evolution Proposals Pipeline** (detailed in Phase 3.1 backlog):
   - HF Daily Papers API polling (daily cron, filters tags: agent memory, RAG, tool-use, context compression, inference efficiency)
   - Haiku-class relevance filter (threshold 0.6, hard gates: no CUDA-only, no >32GB VRAM, no proprietary APIs, code must exist 2+ weeks)
