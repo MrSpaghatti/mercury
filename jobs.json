@@ -1,0 +1,36 @@
+{
+  "jobs": [
+    {
+      "id": "91c3698aae58",
+      "name": "Memory health check",
+      "prompt": "Perform a weekly scan of memory for contradictions, stale nodes, and cluster rebalance suggestions.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 0 * * 0",
+        "display": "0 0 * * 0"
+      },
+      "schedule_display": "0 0 * * 0",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-04-06T06:50:32.250498+00:00",
+      "next_run_at": "2026-04-12T00:00:00+00:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "deliver": "local",
+      "origin": null
+    }
+  ],
+  "updated_at": "2026-04-06T06:50:32.252650+00:00"
+}
