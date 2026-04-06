@@ -16,7 +16,6 @@ Subclasses only need to implement:
     evaluate()        -- Periodic evaluation
 """
 
-import asyncio
 import json
 import logging
 import os
