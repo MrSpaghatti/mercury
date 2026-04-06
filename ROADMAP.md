@@ -16,10 +16,10 @@
 
 | Priority | Task | Jules ID | Status | ETA |
 |----------|------|----------|--------|-----|
-| 3.1 | Implement audit_log table in hermes_state.py | 13652758914226909608 | Planning | — |
-| 3.2 | xMemory Stage I/II retrieval in stack.py | biv3u5mwd | Background | — |
-| 3.3 | Subprocess sandboxing (bwrap/seccomp) | bo60fv6vn | Background | — |
-| 3.4 | Memory health check cron script | bdkmwv45c | Background | — |
+| 3.1 | Implement audit_log table in hermes_state.py | 13652758914226909608 | ✅ Completed | 77b3efea |
+| 3.2 | xMemory Stage I/II retrieval in stack.py | 5783766652620636935 | In Progress | — |
+| 3.3 | Subprocess sandboxing (bwrap/seccomp) | 1952571512354332496 | Planning | — |
+| 3.4 | Memory health check cron script | 5136199449893976380 | Planning | — |
 
 ### 📋 Next (Pending Jules)
 - [ ] Integrate audit_log into run_agent.py (hook at tool routing, memory retrieve, intent parse)
