@@ -111,3 +111,8 @@ markers = [
     "integration: marks tests requiring external services (API keys, Modal, etc.)",
 ]
 addopts = "-m 'not integration'"
+
+# Note: Future pylint/flake8 configuration to prevent broad exception handlers:
+# Once all broad exceptions are refactored, add:
+# [tool.pylint.messages_control]
+# enable = ["broad-exception-caught"]  # Warn on "except Exception" usage
