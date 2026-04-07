@@ -57,6 +57,10 @@
   - Log to `logs/failure_clusters_YYYY-MM-DD.md`
   - **Important:** Run *after* 2.3–2.5 so audit_log has real data
   
+- [ ] **2.8 Implement Hybrid Supervisor/Worker Routing**
+  - Architecture: [docs/plans/2026-04-07-hybrid-routing-architecture.md](docs/plans/2026-04-07-hybrid-routing-architecture.md)
+  - Tasks: Tiered ModelProvider, State-based escalation, context compression for Supervisor hand-offs.
+  
 - [ ] **2.7 Finish sandboxing** (bwrap/seccomp wrapper for exec tool)
   - Jules session 1952571512354332496 (currently in progress)
   - Once done: add to tool_routing decision path, verify injection attempts are blocked
