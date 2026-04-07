@@ -4984,7 +4984,6 @@ class HermesCLI:
                 try:
                     self.agent._persist_session(
                         self.conversation_history,
-                        self.conversation_history,
                     )
                 except Exception:
                     pass  # Best-effort
@@ -5504,9 +5503,6 @@ class HermesCLI:
                     break
                 # Only repaint every 5 s for the countdown — avoids flicker
                 now = _time.monotonic()
-                if now - _last_countdown_refresh >= 5.0:
-                    _last_countdown_refresh = now
-                    self._invalidate()
                 if now - _last_countdown_refresh >= 5.0:
                     _last_countdown_refresh = now
                     self._invalidate()

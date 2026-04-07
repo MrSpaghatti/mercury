@@ -4818,9 +4818,25 @@ class AIAgent:
         try:
             from tools.vision_tools import vision_analyze_tool
 
-            result_json = asyncio.run(
-                vision_analyze_tool(image_url=vision_source, user_prompt=analysis_prompt)
-            )
+            # Try asyncio.run() first (main thread path)
+            try:
+                result_json = asyncio.run(
+                    vision_analyze_tool(image_url=vision_source, user_prompt=analysis_prompt)
+                )
+            except RuntimeError as e:
+                # If asyncio.run() fails due to thread context, create a new event loop
+                if "cannot be called from a running event loop" in str(e) or "set up threads" in str(e):
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        result_json = loop.run_until_complete(
+                            vision_analyze_tool(image_url=vision_source, user_prompt=analysis_prompt)
+                        )
+                    finally:
+                        loop.close()
+                else:
+                    raise  # Re-raise if it's a different RuntimeError
+
             result = json.loads(result_json) if isinstance(result_json, str) else {}
             description = (result.get("analysis") or "").strip()
         except Exception as e:
