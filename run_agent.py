@@ -281,12 +281,15 @@ def _should_parallelize_tool_batch(tool_calls) -> bool:
         tool_name = tool_call.function.name
         try:
             function_args = json.loads(tool_call.function.arguments)
-        except Exception:
+        except json.JSONDecodeError:
             logging.debug(
                 "Could not parse args for %s — defaulting to sequential; raw=%s",
                 tool_name,
                 tool_call.function.arguments[:200],
             )
+            return False
+        except (AttributeError, TypeError) as e:
+            logging.error(f"Unexpected error accessing tool_call.function for {tool_name}: {e}")
             return False
         if not isinstance(function_args, dict):
             logging.debug(
@@ -1766,6 +1769,8 @@ class AIAgent:
                     codex_reasoning_items=msg.get("codex_reasoning_items") if role == "assistant" else None,
                 )
             self._last_flushed_db_idx = len(messages)
+        except (ValueError, TypeError) as e:
+            logger.warning("Session DB append_message failed (invalid data): %s", e)
         except Exception as e:
             logger.warning("Session DB append_message failed: %s", e)
 
@@ -2731,7 +2736,7 @@ class AIAgent:
         # Alibaba Coding Plan API always returns "glm-4.7" as model name regardless
         # of the requested model. Inject explicit model identity into the system prompt
         # so the agent can correctly report which model it is (workaround for API bug).
-        if self.provider == "alibaba":
+        if self.provider == "alibaba" and isinstance(self.model, str):
             _model_short = self.model.split("/")[-1] if "/" in self.model else self.model
             prompt_parts.append(
                 f"You are powered by the model named {_model_short}. "
@@ -4838,7 +4843,11 @@ class AIAgent:
                     raise  # Re-raise if it's a different RuntimeError
 
             result = json.loads(result_json) if isinstance(result_json, str) else {}
-            description = (result.get("analysis") or "").strip()
+            analysis = result.get("analysis", "")
+            # Validate that analysis is a string (API response format validation)
+            if not isinstance(analysis, str):
+                analysis = str(analysis) if analysis else ""
+            description = analysis.strip()
         except Exception as e:
             description = f"Image analysis failed: {e}"
         finally:
@@ -5547,13 +5556,15 @@ class AIAgent:
                     try:
                         new_title = self._session_db.get_next_title_in_lineage(old_title)
                         self._session_db.set_session_title(self.session_id, new_title)
-                    except (ValueError, Exception) as e:
+                    except (ValueError, TypeError) as e:
                         logger.debug("Could not propagate title on compression: %s", e)
                 self._session_db.update_system_prompt(self.session_id, new_system_prompt)
                 # Reset flush cursor — new session starts with no messages written
                 self._last_flushed_db_idx = 0
+            except (ValueError, TypeError) as e:
+                logger.warning("Session DB compression split failed (invalid data): %s", e)
             except Exception as e:
-                logger.warning("Session DB compression split failed — new session will NOT be indexed: %s", e)
+                logger.warning("Session DB compression split failed: %s", e)
 
         # Update token estimate after compaction so pressure calculations
         # use the post-compression count, not the stale pre-compression one.
