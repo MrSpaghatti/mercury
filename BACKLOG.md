@@ -476,6 +476,22 @@ Once R9700 is live and local inference is stable, this flips to tracking local v
    - Store raw metadata in SQLite alongside audit logs
    - Supplement with: arxiv RSS, Papers With Code, HF Spaces trending
 
+1.5. **Upstream Drift Scanning (Weekly, alongside paper polling)**
+   - Cron: weekly (same cadence as paper polling, e.g., Mondays 09:00 UTC)
+   - Source: `git log upstream/main --oneline --since="7 days ago"`
+   - **Setup:** Upstream remote added as read-only: `git remote add upstream https://github.com/NousResearch/hermes-agent --no-push`
+   - Fetch upstream once per week: `git fetch upstream main`
+   - Pipe commit messages through same Haiku-class relevance filter as papers
+   - **Scoring axes:**
+     - Security fixes: always high priority, auto-escalate regardless of score
+     - Performance improvements: high weight
+     - Architectural features relevant to Mercury stack (memory, routing, sandboxing, tool execution)
+   - **Auto-discard patterns:** Upstream work irrelevant to Mercury use case (Discord/Slack/Daytona/serverless backends, Windows support, non-Telegram gateway stuff)
+   - **Output format:** Same proposal format as paper proposals (`proposals/YYYY-MM-DD-upstream-slug.md`)
+   - **Security routing:** Security fixes skip human review Telegram gate and go directly to `proposals/security/` with immediate Telegram alert
+   - **Normal routing:** Everything else follows standard gate: accumulate in `proposals/`, human approves via Telegram, then enters eval-gated autoagent loop
+   - **Important note:** Mercury is a full fork — upstream merges are intentionally avoided. This scanner is cherry-pick intelligence, not a sync mechanism.
+
 2. **Haiku-Class Relevance Filter**
    - *Capability tier, not model name. Current: OpenRouter Haiku. Future: local 8B Q4 quant (ollama + ROCm)*
    - Score each paper against ecosystem tags:
@@ -545,7 +561,10 @@ Once R9700 is live and local inference is stable, this flips to tracking local v
 
 **Acceptance Criteria:**
 - [ ] Polling cron runs daily, stores papers in SQLite
-- [ ] Haiku-class filter scores each paper, rejects <0.6
+- [ ] Upstream remote configured as read-only: `git remote add upstream https://github.com/NousResearch/hermes-agent --no-push`
+- [ ] Weekly upstream scan runs alongside paper polling (fetches `upstream/main` commits from last 7 days)
+- [ ] Haiku-class filter scores each paper and upstream commit, rejects <0.6
+- [ ] Security fixes routed directly to `proposals/security/` with immediate Telegram alert (bypass human gate)
 - [ ] Sonnet-class analyzer generates proposal markdown
 - [ ] At least 3 proposals generated and written to `proposals/`
 - [ ] Telegram notifications functional

@@ -69,6 +69,7 @@
 
 - [ ] **Evolution Proposals Pipeline** (detailed in Phase 3.1 backlog):
   - HF Daily Papers API polling (daily cron, filters tags: agent memory, RAG, tool-use, context compression, inference efficiency)
+  - Upstream drift scanning (weekly, cherry-pick intelligence from `upstream/main` commits, security fixes auto-escalate)
   - Haiku-class relevance filter (threshold 0.6, hard gates: no CUDA-only, no >32GB VRAM, no proprietary APIs, code must exist 2+ weeks)
     - *Note: capability tier, not model name. Current: OpenRouter Haiku. Future: local 8B Q4 quant (ollama/llama.cpp + ROCm)*
   - Sonnet-class applicability analyzer (maps to components, estimates effort/delta)
