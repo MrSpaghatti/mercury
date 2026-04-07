@@ -4394,15 +4394,30 @@ class HermesCLI:
             return False
 
         chrome = candidates[0]
+
+        # Validate port is in valid range to prevent process argument injection
+        try:
+            port_int = int(port)
+            if not (1024 <= port_int <= 65535):
+                logging.debug(f"Invalid port range for Chrome debug: {port_int}")
+                return False
+        except (ValueError, TypeError):
+            logging.debug(f"Invalid port for Chrome debug: {port}")
+            return False
+
         try:
             _sp.Popen(
-                [chrome, f"--remote-debugging-port={port}"],
+                [chrome, f"--remote-debugging-port={port_int}"],
                 stdout=_sp.DEVNULL,
                 stderr=_sp.DEVNULL,
                 start_new_session=True,  # detach from terminal
             )
             return True
-        except Exception:
+        except OSError as e:
+            logging.debug(f"Failed to launch Chrome with debug port {port_int}: {e}")
+            return False
+        except Exception as e:
+            logging.warning(f"Unexpected error launching Chrome: {e}")
             return False
 
     def _handle_browser_command(self, cmd: str):
@@ -5157,10 +5172,16 @@ class HermesCLI:
             while True:
                 with self._voice_lock:
                     still_recording = self._voice_recording
+                    if still_recording:
+                        # Get app reference while holding lock
+                        app = self._app if hasattr(self, '_app') else None
+                    else:
+                        app = None
+
                 if not still_recording:
                     break
-                if hasattr(self, '_app') and self._app:
-                    self._app.invalidate()
+                if app:
+                    app.invalidate()
                 time.sleep(0.15)
         threading.Thread(target=_refresh_level, daemon=True).start()
 
