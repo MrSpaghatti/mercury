@@ -158,6 +158,7 @@ def _discover_tools():
         "tools.send_message_tool",
         # "tools.honcho_tools",  # Removed — Honcho is now a memory provider plugin
         "tools.homeassistant_tool",
+        "tools.heuristic_sanitizer",
     ]
     import importlib
     for mod_name in _modules:
@@ -497,6 +498,14 @@ def handle_function_call(
         if function_name in _AGENT_LOOP_TOOLS:
             return json.dumps({"error": f"{function_name} must be handled by the agent loop"})
 
+        # --- Action Auditor: log intent before execution -----------------
+        try:
+            from tools.action_auditor import audit_pre
+            audit_pre(function_name, function_args, task_id or "",
+                      tool_call_id or "", session_id or "")
+        except Exception:
+            pass
+
         try:
             from hermes_cli.plugins import invoke_hook
             invoke_hook(
@@ -537,6 +546,14 @@ def handle_function_call(
                 session_id=session_id or "",
                 tool_call_id=tool_call_id or "",
             )
+        except Exception:
+            pass
+
+        # --- Action Auditor: log completion/failure -----------------------
+        try:
+            from tools.action_auditor import audit_post
+            audit_post(function_name, function_args, result, task_id or "",
+                       tool_call_id or "", session_id or "")
         except Exception:
             pass
 

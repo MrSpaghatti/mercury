@@ -201,6 +201,11 @@ TOOLSETS = {
         "includes": []
     },
 
+    "audit": {
+        "description": "Audit analysis tools — parse audit logs, detect failures, generate correction reports",
+        "tools": ["heuristic_sanitize"],
+        "includes": []
+    },
 
     # Scenario-specific toolsets
     
@@ -358,7 +363,6 @@ TOOLSETS = {
         "tools": _HERMES_CORE_TOOLS,
         "includes": []
     },
-
     "hermes-wecom": {
         "description": "WeCom bot toolset - enterprise WeChat messaging (full access)",
         "tools": _HERMES_CORE_TOOLS,
